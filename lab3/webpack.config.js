@@ -1,19 +1,17 @@
-const path = require('path')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin'); // Імпортуємо плагін
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const fs = require('fs');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-// Функція для отримання всіх HTML-файлів із директорії
 const htmlPages = fs.readdirSync(path.resolve(__dirname, 'src/pages')).filter(file => file.endsWith('.html'));
 
 const htmlPlugins = htmlPages.map(file => {
     return new HtmlWebpackPlugin({
-      template: `./src/pages/${file}`,
-      filename: file, // Зберігаємо з тим самим ім'ям у dist
-      chunks: [], // Відключаємо підключення JS-файлів, якщо не потрібно
+        template: `./src/pages/${file}`,
+        filename: file, 
     });
-  });
-  
+});
 
 module.exports = {
     entry: {
@@ -21,38 +19,48 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, './dist'),
-        filename: '[name].bundle.js',
-        clean:true,
+        filename: '[name].[contenthash].bundle.js', 
+        clean: true,
     },
     plugins: [
         new CleanWebpackPlugin(),
         ...htmlPlugins,
+        new MiniCssExtractPlugin({
+            filename: '[name].[contenthash].css', 
+        }),
     ],
     devServer: {
         static: './dist',
-        historyApiFallback: true, // Додає підтримку маршрутизації
-        open: true, // Автоматично відкриває браузер після запуску сервера
-        port: 8080, // Ви можете вказати інший порт, якщо потрібно
+        historyApiFallback: true,
+        open: true,
+        port: 8080,
     },
     module: {
         rules: [
             {
                 test: /\.css$/i,
-                use: ['style-loader', 'css-loader'],
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader'
+                ],
             },
             {
-                test: /\.(png|jpeg|gif|svg)$/i,
+                test: /\.scss$/,
                 use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            name: '[name].[hash].[ext]',
-                            outputPath: 'img', // Путь для сохранения изображений
-                        },
-                    },
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
                 ],
+            },
+            {
+                test: /\.(png|jpe?g|gif|svg)$/i,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'img/[name].[hash][ext]', 
+                },
             },
         ],
     },
-    mode: 'development',
-}
+    mode: 'development', 
+};
+
