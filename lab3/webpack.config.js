@@ -4,12 +4,14 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const fs = require('fs');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
+// Отримання всіх HTML-файлів із директорії
 const htmlPages = fs.readdirSync(path.resolve(__dirname, 'src/pages')).filter(file => file.endsWith('.html'));
 
 const htmlPlugins = htmlPages.map(file => {
     return new HtmlWebpackPlugin({
         template: `./src/pages/${file}`,
-        filename: file, 
+        filename: file, // Зберігаємо з тим самим ім'ям у dist
+        // Видаліть `chunks: []`, якщо потрібно включити JS-файли
     });
 });
 
@@ -19,7 +21,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, './dist'),
-        filename: '[name].[contenthash].bundle.js', 
+        filename: '[name].[contenthash].bundle.js', // Використовуємо хеші для кешування
         clean: true,
     },
     plugins: [
@@ -28,6 +30,7 @@ module.exports = {
         new MiniCssExtractPlugin({
             filename: '[name].[contenthash].css', 
         }),
+
     ],
     devServer: {
         static: './dist',
@@ -37,6 +40,7 @@ module.exports = {
     },
     module: {
         rules: [
+            // Лоадери для CSS файлів
             {
                 test: /\.css$/i,
                 use: [
@@ -44,6 +48,7 @@ module.exports = {
                     'css-loader'
                 ],
             },
+            // Лоадери для SCSS файлів
             {
                 test: /\.scss$/,
                 use: [
@@ -52,15 +57,15 @@ module.exports = {
                     'sass-loader'
                 ],
             },
+            // Заміна file-loader на asset/resource для зображень
             {
                 test: /\.(png|jpe?g|gif|svg)$/i,
                 type: 'asset/resource',
                 generator: {
-                    filename: 'img/[name].[hash][ext]', 
+                    filename: 'img/[name].[hash][ext]', // Директория для зображень
                 },
             },
         ],
     },
-    mode: 'development', 
+    mode: 'development', // Для production бажано зробити окрему конфігурацію
 };
-

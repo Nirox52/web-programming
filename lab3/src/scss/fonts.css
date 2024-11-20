@@ -1,0 +1,4 @@
+@font-face {
+    font-family: 'Roboto'; /* Имя шрифта */
+    src: url("../assetc/fonts/beer money.ttf") format("truetype"); /* Путь к файлу со шрифтом */
+}
